@@ -1,29 +1,29 @@
 import requests
 from bs4 import BeautifulSoup
 from collections import Counter
-import re
 
-page_url = 'taget url'
+def get_html(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.content.decode()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return None
 
-def get_html_of(url):
-  try:
-    resp = requests.get(url)
-    resp.raise_for_status()
-    return resp.content.decode()
-  except requests.exceptions.RequestException as e:
-    print(f'error: {e}')
-    exit(1)
-
-def get_top_words(text,n=10):
-  all_words = re.findall(r'\w+',text.lower())
-  word_count = Counter(all_words)
-  return word_count.most_common(n)
+def get_top_words(html, min_length=0, top_n=10):
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text()
+    words = [word.lower() for word in text.split() if len(word) >= min_length]
+    word_count = Counter(words)
+    return word_count.most_common(top_n)
 
 if __name__ == '__main__':
-  html = get_html_of(page_url)
-  soup = BeautifulSoup(html,'html.parser')
-  raw_text = soup.get_text()
-  top_words = get_top_words(raw_text)
+    url = input("Enter the URL: ")
+    html = get_html(url)
 
-  for word,count in top_words:
-    print(f'{word}:{count}')
+    if html is not None:
+        top_words = get_top_words(html, min_length=4, top_n=10)
+
+        for word, count in top_words:
+            print(f'{word}: {count}')
